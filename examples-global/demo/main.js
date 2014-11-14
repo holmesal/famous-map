@@ -275,8 +275,8 @@ mapView.on('load', function () {
     mainContext.add(travellerMapModifier).add(travellerModifier).add(traveller);
 
 
-    /* FIX: the transition map-speed was the error but now I don't know how to
-    recreate the animation.
+    /* FIX: the transition map-speed was the error cause it's was not registered
+     but now I don't know how to recreate the animation.
     */
     var SpringTransition = famous.transitions.SpringTransition;
     Transitionable.registerMethod('map-speed', SpringTransition);
