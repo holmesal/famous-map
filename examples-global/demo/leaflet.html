@@ -12,30 +12,24 @@
         <script type="text/javascript" src="https://code.famo.us/lib/classList.js"></script>
         <script type="text/javascript" src="https://code.famo.us/lib/requestAnimationFrame.js"></script>
 
-        <!-- google maps -->
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-
-        <!-- module loader -->
-        <script type="text/javascript" src="https://code.famo.us/lib/require.js"></script>
+        <!-- leaflet / open street maps -->
+        <link rel="stylesheet" href="https://rawgit.com/IjzerenHein/leaflet-dist/master/leaflet.css" />
+        <script src="https://rawgit.com/IjzerenHein/leaflet-dist/master/leaflet.js"></script>
 
         <!-- famous -->
         <link rel="stylesheet" type="text/css" href="https://code.famo.us/famous/0.3/famous.css" />
-        <script type="text/javascript" src="https://code.famo.us/famous/0.3/famous.min.js"></script>
+        <script type="text/javascript" src="http://code.famo.us/famous/0.3/famous-global.min.js"></script>
 
         <!-- famous-map -->
-        <script type="text/javascript" src="../../dist/famous-map.min.js"></script>
+        <script type="text/javascript" src="../../dist/famous-map-global.js"></script>
 
         <!-- main -->
         <script type="text/javascript" src="./main.js"></script>
 
         <!-- app code -->
         <link rel="stylesheet" type="text/css" href="styles.css" />
-        <script type="text/javascript">
-            require(['main']);
-        </script>
-
     </head>
     <body>
-        <a class='provider' href='leaflet.html'>Switch to Leaflet / OSM</a>
+        <a class='provider' href='index.html'>Switch to Google Maps</a>
     </body>
 </html>

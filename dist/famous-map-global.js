@@ -26,6 +26,8 @@ var famous_map = (function () {
     $private.Transform = famous.core.Transform;
     $private.Transitionable = famous.transitions.Transitionable;
 
+    $private._globalMapViewId = 1;
+
     /**
      * @class
      * @alias module:$public.MapUtility
@@ -875,8 +877,8 @@ var famous_map = (function () {
         else {
 
             // Otherwise generate unique id, and create the div ourselves
-            this.mapId = '$public.MapView' + _global$public.MapViewId;
-            _global$public.MapViewId++;
+            this.mapId = 'MapView' + $private._globalMapViewId;
+            $private._globalMapViewId++;
 
             // Insert div into the DOM
             var surface = new $private.Surface({
