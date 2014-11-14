@@ -7,9 +7,9 @@
 $public.$public.MapUtility
 $public.MapTransition -> $public.MapUtility
 $public.MapModifier -> ($public.MapUtility, Transform)
-MapPositionTransitionable -> ($public.MapUtility, Transitionable)
+$public.MapPositionTransitionable -> ($public.MapUtility, Transitionable)
 MapStateModifier -> ($public.MapModifier, MapPositionTransionable)
-MapView -> ($public.MapUtility, MapPositionTransitionable, $public.MapTransition, Surface,
+MapView -> ($public.MapUtility, $public.MapPositionTransitionable, $public.MapTransition, Surface,
   View, Transitionable)
 */
 
@@ -551,6 +551,97 @@ var famous_map = (function () {
         this._output.target = target;
         return this._output;
     };
+
+    /**
+     * @class
+     * @param {LatLng} [position] Default geopgraphical position
+     * @alias module:$public.MapPositionTransitionable
+     */
+    $public.MapPositionTransitionable = function MapPositionTransionable(position) {
+        this.position = new Transitionable([0, 0]);
+        if (position) {
+            this.set(position);
+        }
+    }
+
+    /**
+     * Sets the default transition to use for transitioning between position states.
+     *
+     * @param  {Object} transition Transition definition
+     */
+    $public.MapPositionTransitionable.prototype.setDefaultTransition = function setDefaultTransition(transition) {
+        this.position.setDefault(transition);
+    };
+
+    /**
+     * Cancel all transitions and reset to a geographical position.
+     *
+     * @param {LatLng} position
+     */
+    $public.MapPositionTransitionable.prototype.reset = function reset(position) {
+        var latlng = [MapUtility.lat(position), MapUtility.lng(position)];
+        this.position.reset(latlng);
+        this._final = position;
+    };
+
+    /**
+     * Set the geographical position by adding it to the queue of transition.
+     *
+     * @param {LatLng} position
+     * @param {Object} [transition] Transition definition
+     * @param {Function} [callback] Callback
+     */
+    $public.MapPositionTransitionable.prototype.set = function set(position, transition, callback) {
+        var latlng = [MapUtility.lat(position), MapUtility.lng(position)];
+        this.position.set(latlng, transition, callback);
+        this._final = position;
+        return this;
+    };
+
+    /**
+     * Get the current geographical position.
+     *
+     * @return {LatLng}
+     */
+    $public.MapPositionTransitionable.prototype.get = function get() {
+        if (this.isActive()) {
+            var latlng = this.position.get();
+            return {
+                lat: latlng[0],
+                lng: latlng[1]
+            };
+        }
+        else {
+            return this._final;
+        }
+    };
+
+    /**
+     * Get the destination geographical position.
+     *
+     * @return {LatLng}
+     */
+    $public.MapPositionTransitionable.prototype.getFinal = function getFinal() {
+        return this._final;
+    };
+
+    /**
+     * Determine if the transitionable is currently transitioning
+     *
+     * @return {Boolean}
+     */
+    $public.MapPositionTransitionable.prototype.isActive = function isActive() {
+        return this.position.isActive();
+    };
+
+    /**
+     * Halts the transition
+     */
+    $public.MapPositionTransitionable.prototype.halt = function halt() {
+        this._final = this.get();
+        this.position.halt();
+    };
+
 
     return $public;
 }());
