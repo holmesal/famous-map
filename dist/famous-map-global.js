@@ -586,6 +586,9 @@ var famous_map = (function () {
      */
     $public.MapPositionTransitionable.prototype.set = function set(position, transition, callback) {
         var latlng = [$public.MapUtility.lat(position), $public.MapUtility.lng(position)];
+        console.log(transition);
+        console.log(callback);
+        console.log(latlng);
         this.position.set(latlng, transition, callback);
         this._final = position;
         return this;

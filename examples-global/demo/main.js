@@ -34,6 +34,7 @@ var Modifier = famous.core.Modifier;
 var Surface = famous.core.Surface;
 var ImageSurface = famous.surfaces.ImageSurface;
 var Transform = famous.core.Transform;
+var Transitionable = famous.core.Transitionable;
 var Easing = famous.transitions.Easing;
 
 var MapView = famous_map.MapView;
@@ -274,6 +275,10 @@ mapView.on('load', function () {
     mainContext.add(travellerMapModifier).add(travellerModifier).add(traveller);
 
 
+    var map_speed = new Transitionable();
+    var SpringTransition = famous.transitions.SpringTransition;
+    map_speed.registerMethod('map-speed', SpringTransition);
+
     //
     // Let the traveller drive around the roundabout
     //
@@ -284,12 +289,16 @@ mapView.on('load', function () {
         var position = roundabout[roundaboutIndex];
         travellerMapModifier.setPosition(
             position,
-            { method: 'map-speed', speed2: 3000 }, // km/h
+            map_speed,
             _driveRoundabout
         );
     }
+
+    /* _driveRoundabout generating error */
     _driveRoundabout();
+
 
     // Let the compass rotate towards the traveller
     compassMapModifier.rotateTowardsFrom(travellerMapModifier);
+
 });
