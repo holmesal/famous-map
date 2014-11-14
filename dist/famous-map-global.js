@@ -4,7 +4,7 @@
 */
 
 /*
-$public.MapUtility
+$public.$public.MapUtility
 $public.MapTransition -> $public.MapUtility
 MapModifier -> ($public.MapUtility, Transform)
 MapPositionTransitionable -> ($public.MapUtility, Transitionable)
@@ -209,7 +209,7 @@ var famous_map = (function () {
         this._endState = _clone(state);
         this._active = true;
         this._callback = callback;
-        this._distance = MapUtility.distanceBetweenPositions(this._startState, this._endState);
+        this._distance = $public.MapUtility.distanceBetweenPositions(this._startState, this._endState);
         this._duration = (this._distance / this._speed) * (60 * 60 * 1000);
         //console.log('distance: ' + this._distance + ' km, speed: ' + transition.speed + 'km/h, duration:' + this._duration + ' ms');
     };
