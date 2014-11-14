@@ -6,10 +6,10 @@
 /*
 $public.$public.MapUtility
 $public.MapTransition -> $public.MapUtility
-$public.MapModifier -> ($public.MapUtility, Transform)
+$public.MapModifier -> ($public.MapUtility, $private.Transform)
 $public.MapPositionTransitionable -> ($public.MapUtility, Transitionable)
 $public.MapStateModifier -> ($public.MapModifier, MapPositionTransionable)
-$public.MapView -> ($public.MapUtility, $public.MapPositionTransitionable, $public.MapTransition, Surface,
+$public.MapView -> ($public.MapUtility, $public.MapPositionTransitionable, $public.MapTransition, $private.Surface,
   View, Transitionable)
 */
 
@@ -26,18 +26,9 @@ var famous_map = (function () {
     $private.Transform = famous.core.Transform;
     $private.Transitionable = famous.transitions.Transitionable;
 
-    // For test use
-    $public.print = function () {
-      console.log($private.Transform);
-      console.log($private.Transitionable);
-      console.log($private.Surface);
-      console.log($private.View);
-    };
-
-
     /**
      * @class
-     * @alias module:MapUtility
+     * @alias module:$public.MapUtility
      */
     $public.MapUtility = {};
 
@@ -135,7 +126,7 @@ var famous_map = (function () {
 
     /**
      * @class
-     * @alias module:MapTransition
+     * @alias module:$public.MapTransition
      */
     $public.MapTransition = function MapTransition(){
 
@@ -294,14 +285,14 @@ var famous_map = (function () {
      * @param {LatLng | object | function} [options.rotateTowards] Position to rotate the renderables towards.
      * @param {number} [options.zoomBase] Base zoom-level at which the renderables are displayed in their true size.
      * @param {number | function} [options.zoomScale] Customer zoom-scaling factor or function.
-     * @alias module:MapModifier
+     * @alias module:$public.MapModifier
      */
     $public.MapModifier = function MapModifier(options) {
 
         this.mapView = options.mapView;
 
         this._output = {
-            transform: Transform.identity,
+            transform: $private.Transform.identity,
             opacity: 1,
             origin: null,
             align: null,
@@ -350,7 +341,7 @@ var famous_map = (function () {
      * Set the geographical position to rotate the renderables towards.
      * The child renderables are assumed to be rotated to the right by default.
      * To change the base rotation, add a rotation-transform to the renderable, like this:
-     * `new Modifier({transform: Transform.rotateZ(Math.PI/2)})`
+     * `new Modifier({transform: $private.Transform.rotateZ(Math.PI/2)})`
      *
      * @param {LatLng} position Geographical position to rotate towards.
      */
@@ -452,7 +443,7 @@ var famous_map = (function () {
 
     /**
      * Return render spec for this $public.MapModifier, applying to the provided
-     *    target component.  This is similar to render() for Surfaces.
+     *    target component.  This is similar to render() for $private.Surfaces.
      *
      * @private
      * @ignore
@@ -487,7 +478,7 @@ var famous_map = (function () {
             }
             if (this._cache.scaling !== scaling) {
                 this._cache.scaling = scaling;
-                this._cache.scale = Transform.scale(scaling, scaling, 1.0);
+                this._cache.scale = $private.Transform.scale(scaling, scaling, 1.0);
                 cacheInvalidated = true;
             }
         } else if (this._cache.scale) {
@@ -503,18 +494,18 @@ var famous_map = (function () {
             // Offset position
             if (this._offset) {
                 position = {
-                    lat: MapUtility.lat(position) + MapUtility.lat(this._offset),
-                    lng: MapUtility.lng(position) + MapUtility.lng(this._offset)
+                    lat: $public.MapUtility.lat(position) + $public.MapUtility.lat(this._offset),
+                    lng: $public.MapUtility.lng(position) + $public.MapUtility.lng(this._offset)
                 };
             }
 
             // Calculate rotation transform
             var rotateTowards = this._rotateTowardsGetter ? this._rotateTowardsGetter() : this._rotateTowards;
             if (rotateTowards) {
-                var rotation = MapUtility.rotationFromPositions(position, rotateTowards);
+                var rotation = $public.MapUtility.rotationFromPositions(position, rotateTowards);
                 if (this._cache.rotation !== rotation) {
                     this._cache.rotation = rotation;
-                    this._cache.rotate = Transform.rotateZ(rotation);
+                    this._cache.rotate = $private.Transform.rotateZ(rotation);
                     cacheInvalidated = true;
                 }
             } else if (this._cache.rotate) {
@@ -527,7 +518,7 @@ var famous_map = (function () {
             var point = this.mapView.pointFromPosition(position);
             if (!this._cache.point || (point.x !== this._cache.point.x) || (point.y !== this._cache.point.y)) {
                 this._cache.point = point;
-                this._cache.translate = Transform.translate(point.x, point.y, 0);
+                this._cache.translate = $private.Transform.translate(point.x, point.y, 0);
                 cacheInvalidated = true;
             }
         } else if (this._cache.translate) {
@@ -540,10 +531,10 @@ var famous_map = (function () {
         if (cacheInvalidated) {
             var transform = this._cache.scale;
             if (this._cache.rotate) {
-                transform = transform ? Transform.multiply(this._cache.rotate, transform) : this._cache.rotate;
+                transform = transform ? $private.Transform.multiply(this._cache.rotate, transform) : this._cache.rotate;
             }
             if (this._cache.translate) {
-                transform = transform ? Transform.multiply(this._cache.translate, transform) : this._cache.translate;
+                transform = transform ? $private.Transform.multiply(this._cache.translate, transform) : this._cache.translate;
             }
             this._output.transform = transform;
         }
@@ -557,8 +548,8 @@ var famous_map = (function () {
      * @param {LatLng} [position] Default geopgraphical position
      * @alias module:$public.MapPositionTransitionable
      */
-    $public.MapPositionTransitionable = function MapPositionTransionable(position) {
-        this.position = new Transitionable([0, 0]);
+    $public.MapPositionTransitionable = function MapPositionTransitionable(position) {
+        this.position = new $private.Transitionable([0, 0]);
         if (position) {
             this.set(position);
         }
@@ -579,7 +570,7 @@ var famous_map = (function () {
      * @param {LatLng} position
      */
     $public.MapPositionTransitionable.prototype.reset = function reset(position) {
-        var latlng = [MapUtility.lat(position), MapUtility.lng(position)];
+        var latlng = [$public.MapUtility.lat(position), $public.MapUtility.lng(position)];
         this.position.reset(latlng);
         this._final = position;
     };
@@ -592,7 +583,7 @@ var famous_map = (function () {
      * @param {Function} [callback] Callback
      */
     $public.MapPositionTransitionable.prototype.set = function set(position, transition, callback) {
-        var latlng = [MapUtility.lat(position), MapUtility.lng(position)];
+        var latlng = [$public.MapUtility.lat(position), $public.MapUtility.lng(position)];
         this.position.set(latlng, transition, callback);
         this._final = position;
         return this;
@@ -655,10 +646,10 @@ var famous_map = (function () {
      */
     $public.MapStateModifier = function MapStateModifier(options) {
         this.mapView = options.mapView;
-        this._positionState = new MapPositionTransitionable(options.position);
-        this._rotateTowardsState = new MapPositionTransitionable(options.rotateTowards);
+        this._positionState = new $public.MapPositionTransitionable(options.position);
+        this._rotateTowardsState = new $public.MapPositionTransitionable(options.rotateTowards);
 
-        this._modifier = new MapModifier({
+        this._modifier = new $public.MapModifier({
             mapView: this.mapView
         });
 
@@ -696,7 +687,7 @@ var famous_map = (function () {
      * to the chain of transitions.
      * The child renderables are assumed to be rotated to the right by default.
      * To change the base rotation, add a rotation-transform to the renderable, like this:
-     * `new Modifier({transform: Transform.rotateZ(Math.PI/2)})`
+     * `new Modifier({transform: $private.Transform.rotateZ(Math.PI/2)})`
      *
      * @param {LatLng} position Destination position in geographical position to rotate towards.
      * @param {Transition} [transition] Famo.us transitionable object.
@@ -823,7 +814,7 @@ var famous_map = (function () {
 
     /**
      * Return render spec for this $public.MapStateModifier, applying to the provided
-     *    target component.  This is similar to render() for Surfaces.
+     *    target component.  This is similar to render() for $private.Surfaces.
      *
      * @private
      * @ignore
@@ -859,16 +850,16 @@ var famous_map = (function () {
      * @alias module:$public.MapView
      */
     $public.MapView = function MapView() {
-        View.apply(this, arguments);
+        $private.View.apply(this, arguments);
 
         // Initialize
         this.map = null;
         this.mapType = this.options.type;
-        this._position = new MapPositionTransitionable(this.options.mapOptions.center);
+        this._position = new $public.MapPositionTransitionable(this.options.mapOptions.center);
         this._zoom = {
-            center: new MapPositionTransitionable(this.options.mapOptions.center),
-            northEast: new MapPositionTransitionable(this.options.mapOptions.center),
-            southWest: new MapPositionTransitionable(this.options.mapOptions.center)
+            center: new $public.MapPositionTransitionable(this.options.mapOptions.center),
+            northEast: new $public.MapPositionTransitionable(this.options.mapOptions.center),
+            southWest: new $public.MapPositionTransitionable(this.options.mapOptions.center)
         };
         this._cache = {};
 
@@ -888,7 +879,7 @@ var famous_map = (function () {
             _global$public.MapViewId++;
 
             // Insert div into the DOM
-            var surface = new Surface({
+            var surface = new $private.Surface({
                 classes: ['mapview'],
                 content: '<div id="' + this.mapId + '" style="width: 100%; height: 100%;"></div>',
                 size: [undefined, undefined]
@@ -1017,7 +1008,7 @@ var famous_map = (function () {
         switch (this.mapType) {
         case MapType.GOOGLEMAPS:
             if (!(position instanceof google.maps.LatLng)) {
-                position = new google.maps.LatLng(MapUtility.lat(position), MapUtility.lng(position), true);
+                position = new google.maps.LatLng($public.MapUtility.lat(position), $public.MapUtility.lng(position), true);
             }
             var worldPoint = this.map.getProjection().fromLatLngToPoint(position);
             return {
@@ -1094,10 +1085,10 @@ var famous_map = (function () {
         case MapType.GOOGLEMAPS:
 
             if (!(northEast instanceof google.maps.LatLng)) {
-                northEast = new google.maps.LatLng(MapUtility.lat(northEast), MapUtility.lng(northEast), true);
+                northEast = new google.maps.LatLng($public.MapUtility.lat(northEast), $public.MapUtility.lng(northEast), true);
             }
             if (!(southWest instanceof google.maps.LatLng)) {
-                southWest = new google.maps.LatLng(MapUtility.lat(southWest), MapUtility.lng(southWest), true);
+                southWest = new google.maps.LatLng($public.MapUtility.lat(southWest), $public.MapUtility.lng(southWest), true);
             }
 
             var topRight = this.map.getProjection().fromLatLngToPoint(northEast);
@@ -1120,10 +1111,10 @@ var famous_map = (function () {
             northEast = this._zoom.northEast.get();
             southWest = this._zoom.southWest.get();
             if (!(northEast instanceof google.maps.LatLng)) {
-                northEast = new google.maps.LatLng(MapUtility.lat(northEast), MapUtility.lng(northEast), true);
+                northEast = new google.maps.LatLng($public.MapUtility.lat(northEast), $public.MapUtility.lng(northEast), true);
             }
             if (!(southWest instanceof google.maps.LatLng)) {
-                southWest = new google.maps.LatLng(MapUtility.lat(southWest), MapUtility.lng(southWest), true);
+                southWest = new google.maps.LatLng($public.MapUtility.lat(southWest), $public.MapUtility.lng(southWest), true);
             }
 
             this._cache.topRight = this.map.getProjection().fromLatLngToPoint(northEast);
@@ -1162,7 +1153,7 @@ var famous_map = (function () {
             center = this.map.getCenter();
             zoom = this.map.getZoom();
 
-            var centerLng = MapUtility.lng(center);
+            var centerLng = $public.MapUtility.lng(center);
 
             northEast = bounds.getNorthEast();
             var northEastLng = northEast.lng();
@@ -1242,8 +1233,8 @@ var famous_map = (function () {
 
             // Update the cache
             if (invalidateCache || (info.zoom !== this._cache.finalZoom) ||
-                    !MapUtility.equals(info.northEast, this._cache.finalNorthEast) ||
-                    !MapUtility.equals(info.southWest, this._cache.finalSouthWest)) {
+                    !$public.MapUtility.equals(info.northEast, this._cache.finalNorthEast) ||
+                    !$public.MapUtility.equals(info.southWest, this._cache.finalSouthWest)) {
                 //console.log('updating cache..');
                 this._updateCache(info.zoom, info.northEast, info.southWest);
             }
