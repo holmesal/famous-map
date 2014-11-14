@@ -5,11 +5,11 @@
 
 /*
 $public.MapUtility
-MapTransition -> $public.MapUtility
+$public.MapTransition -> $public.MapUtility
 MapModifier -> ($public.MapUtility, Transform)
 MapPositionTransitionable -> ($public.MapUtility, Transitionable)
 MapStateModifier -> (MapModifier, MapPositionTransionable)
-MapView -> ($public.MapUtility, MapPositionTransitionable, MapTransition, Surface,
+MapView -> ($public.MapUtility, MapPositionTransitionable, $public.MapTransition, Surface,
   View, Transitionable)
 */
 
@@ -119,7 +119,157 @@ var famous_map = (function () {
         return d;
     };
 
-    
+    /**
+     * @class
+     * @alias module:MapTransition
+     */
+    $public.MapTransition = function MapTransition(){
+
+        this.state = undefined;
+
+        this._startTime = 0;
+        this._startState = 0;
+        this._updateTime = 0;
+        this._endState = 0;
+        this._active = false;
+        this._duration = 0;
+        this._distance = 0;
+        this._callback = undefined;
+    }
+
+    $public.MapTransition.SUPPORTS_MULTIPLE = 2;
+
+    /**
+     * @property DEFAULT_OPTIONS
+     * @protected
+     */
+    $public.MapTransition.DEFAULT_OPTIONS = {
+
+        /**
+         * The speed of the transition in mph.
+         */
+        speed : 1000 // mph
+    };
+
+    // Interpolate: If a linear function f(0) = a, f(1) = b, then return f(t)
+    function _interpolate(a, b, t) {
+        return ((1 - t) * a) + (t * b);
+    }
+    function _clone(obj) {
+        return obj.slice(0);
+    }
+
+    /**
+     * Resets the position
+     *
+     * @param {Array.Number} state Array: [lat, lng]
+     */
+    $public.MapTransition.prototype.reset = function reset(state) {
+        if (this._callback) {
+            var callback = this._callback;
+            this._callback = undefined;
+            callback();
+        }
+
+        this.state = _clone(state);
+
+        this._startTime = 0;
+        this._updateTime = 0;
+        this._startState = this.state;
+        this._endState = this.state;
+        this._duration = 0;
+        this._distance = 0;
+        this._active = false;
+    };
+
+    /**
+     * Set the end position and transition, with optional callback on completion.
+     *
+     * @param {Array.Number} state Array: [lat,lng]
+     * @param {Object} [transition] Transition definition
+     * @param {Function} [callback] Callback
+     */
+    $public.MapTransition.prototype.set = function set(state, transition, callback) {
+
+        if (!transition) {
+            this.reset(state);
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+
+        this._speed = $public.MapTransition.DEFAULT_OPTIONS.speed;
+        if (transition && transition.speed) {
+            this._speed = transition.speed;
+        }
+
+        this._startState = this.get();
+        this._startTime = Date.now();
+        this._endState = _clone(state);
+        this._active = true;
+        this._callback = callback;
+        this._distance = MapUtility.distanceBetweenPositions(this._startState, this._endState);
+        this._duration = (this._distance / this._speed) * (60 * 60 * 1000);
+        //console.log('distance: ' + this._distance + ' km, speed: ' + transition.speed + 'km/h, duration:' + this._duration + ' ms');
+    };
+
+    /**
+     * Get the current position of the transition.
+     *
+     * @param {Date} [timestamp] Timestamp at which to get the position
+     * @return {Array.Number} Array: [lat, lng]
+     */
+    $public.MapTransition.prototype.get = function get(timestamp) {
+        if (!this._active) {
+            if (this._callback) {
+                var callback = this._callback;
+                this._callback = undefined;
+                callback();
+            }
+            return this.state;
+        }
+
+        if (!timestamp) {
+            timestamp = Date.now();
+        }
+        if (this._updateTime >= timestamp) {
+            return this.state;
+        }
+        this._updateTime = timestamp;
+
+        var timeSinceStart = timestamp - this._startTime;
+        if (timeSinceStart >= this._duration) {
+            this.state = this._endState;
+            this._active = false;
+        } else if (timeSinceStart < 0) {
+            this.state = this._startState;
+        }
+        else {
+            var t = timeSinceStart / this._duration;
+            var lat = _interpolate(this._startState[0], this._endState[0], t);
+            var lng = _interpolate(this._startState[1], this._endState[1], t);
+            this.state = [lat, lng];
+        }
+
+        return this.state;
+    };
+
+    /**
+     * Detects whether a transition is in progress
+     *
+     * @return {Boolean}
+     */
+    $public.MapTransition.prototype.isActive = function isActive() {
+        return this._active;
+    };
+
+    /**
+     * Halt the transition
+     */
+    $public.MapTransition.prototype.halt = function halt() {
+        this.set(this.get());
+    };
 
     return $public;
 }());
