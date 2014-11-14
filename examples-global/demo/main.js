@@ -34,7 +34,7 @@ var Modifier = famous.core.Modifier;
 var Surface = famous.core.Surface;
 var ImageSurface = famous.surfaces.ImageSurface;
 var Transform = famous.core.Transform;
-var Transitionable = famous.core.Transitionable;
+var Transitionable = famous.transitions.Transitionable;
 var Easing = famous.transitions.Easing;
 
 var MapView = famous_map.MapView;
@@ -275,9 +275,11 @@ mapView.on('load', function () {
     mainContext.add(travellerMapModifier).add(travellerModifier).add(traveller);
 
 
-    var map_speed = new Transitionable();
+    /* FIX: the transition map-speed was the error but now I don't know how to
+    recreate the animation.
+    */
     var SpringTransition = famous.transitions.SpringTransition;
-    map_speed.registerMethod('map-speed', SpringTransition);
+    Transitionable.registerMethod('map-speed', SpringTransition);
 
     //
     // Let the traveller drive around the roundabout
@@ -289,12 +291,11 @@ mapView.on('load', function () {
         var position = roundabout[roundaboutIndex];
         travellerMapModifier.setPosition(
             position,
-            map_speed,
+            {method: 'map-speed', speed2: 3000},
             _driveRoundabout
         );
     }
 
-    /* _driveRoundabout generating error */
     _driveRoundabout();
 
 
