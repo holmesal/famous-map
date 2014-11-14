@@ -21,6 +21,20 @@ var famous_map = (function () {
     $private = {};
     $public = {};
 
+    $private.Surface = famous.core.Surface;
+    $private.View = famous.core.View;
+    $private.Transform = famous.core.Transform;
+    $private.Transitionable = famous.transitions.Transitionable;
+
+    // For test use
+    $public.print = function () {
+      console.log($private.Transform);
+      console.log($private.Transitionable);
+      console.log($private.Surface);
+      console.log($private.View);
+    };
+
+    
     /**
      * @class
      * @alias module:MapUtility
