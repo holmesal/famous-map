@@ -37,6 +37,7 @@ var ImageSurface = famous.surfaces.ImageSurface;
 var Transform = famous.core.Transform;
 var RenderController = famous.views.RenderController;
 var RenderNode = famous.core.RenderNode;
+var Transitionable = famous.transitions.Transitionable;
 
 var MapView = famous_map.MapView;
 var MapModifier = famous_map.MapModifier;
@@ -136,7 +137,11 @@ mapView.on('load', function () {
         }).addTo(mapView.getMap());
     }
 
-    // Nyan cat not showing, FIX probably method 'map-speed', same cause as demo
+    // I Tried fix mapView.setPosition(method:'map-speed'),
+    // creating the method map-speed but nyan-cat don't run.
+    var SpringTransition = famous.transitions.SpringTransition;
+    Transitionable.registerMethod('map-speed', SpringTransition);
+
     //
     // Pan the map across the world
     //
